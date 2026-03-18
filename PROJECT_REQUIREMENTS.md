@@ -14,16 +14,16 @@ O usuário carrega um contrato-base com variáveis dinâmicas (`$cliente.nome`, 
 
 ## 2. Stack Tecnológica
 
-| Camada | Tecnologia |
-|---|---|
-| Framework PHP | Laravel 13 |
-| Painel Admin | Filament v5 |
-| Testes | PEST PHP (TDD) |
-| Banco de dados local | MySQL via Takeout (Docker) |
-| Editor de texto rico | TipTap ou similar (integrado ao Filament) |
-| Armazenamento de arquivos | Laravel Storage (disco `local`) |
-| Autenticação | Laravel Breeze / Filament Shield |
-| Linguagem | PHP 8.3+ |
+| Camada                    | Tecnologia                                |
+| ------------------------- | ----------------------------------------- |
+| Framework PHP             | Laravel 13                                |
+| Painel Admin              | Filament v5                               |
+| Testes                    | PEST PHP (TDD)                            |
+| Banco de dados local      | MySQL via Takeout (Docker)                |
+| Editor de texto rico      | TipTap ou similar (integrado ao Filament) |
+| Armazenamento de arquivos | Laravel Storage (disco `local`)           |
+| Autenticação              | Laravel Breeze / Filament Shield          |
+| Linguagem                 | PHP 8.3+                                  |
 
 ---
 
@@ -49,10 +49,10 @@ takeout enable mysql
 - Testes ficam em `tests/Feature` (fluxos completos via Filament/HTTP) e `tests/Unit` (lógica isolada).
 - Rodar a suite completa antes de qualquer commit: `php artisan test`.
 - Nomenclatura dos testes em inglês, descritiva:
-  ```php
-  it('replaces client variables in a contract body');
-  it('prevents unauthenticated users from accessing contracts');
-  ```
+    ```php
+    it('replaces client variables in a contract body');
+    it('prevents unauthenticated users from accessing contracts');
+    ```
 
 ### 4.2 Boas Práticas
 
@@ -69,79 +69,100 @@ takeout enable mysql
 ## 5. Entidades e Modelo de Dados
 
 ### 5.1 `users`
+
 Gerenciado pelo Laravel/Filament. Campos padrão + `is_admin` (boolean).
 
 ### 5.2 `clients`
+
 Atributos utilizados em contratos:
 
-| Coluna | Tipo | Variável no contrato |
-|---|---|---|
-| `id` | UUID | — |
-| `user_id` | FK → users | — |
-| `name` | string | `$cliente.nome` |
-| `email` | string | `$cliente.email` |
-| `phone` | string | `$cliente.telefone` |
-| `cpf` | string | `$cliente.cpf` |
-| `rg` | string | `$cliente.rg` |
-| `birth_date` | date | `$cliente.nascimento` |
-| `nationality` | string | `$cliente.nacionalidade` |
-| `marital_status` | enum | `$cliente.estado_civil` |
-| `profession` | string | `$cliente.profissao` |
-| `address` | string | `$cliente.endereco` |
-| `address_number` | string | `$cliente.endereco_numero` |
-| `address_complement`| string | `$cliente.endereco_complemento` |
-| `neighborhood` | string | `$cliente.bairro` |
-| `city` | string | `$cliente.cidade` |
-| `state` | string | `$cliente.estado` |
-| `zip_code` | string | `$cliente.cep` |
-| `created_at` | timestamp | — |
-| `updated_at` | timestamp | — |
+| Coluna               | Tipo       | Variável no contrato            |
+| -------------------- | ---------- | ------------------------------- |
+| `id`                 | UUID       | —                               |
+| `user_id`            | FK → users | —                               |
+| `name`               | string     | `$cliente.nome`                 |
+| `email`              | string     | `$cliente.email`                |
+| `phone`              | string     | `$cliente.telefone`             |
+| `cpf`                | string     | `$cliente.cpf`                  |
+| `rg`                 | string     | `$cliente.rg`                   |
+| `birth_date`         | date       | `$cliente.nascimento`           |
+| `nationality`        | string     | `$cliente.nacionalidade`        |
+| `marital_status`     | enum       | `$cliente.estado_civil`         |
+| `profession`         | string     | `$cliente.profissao`            |
+| `address`            | string     | `$cliente.endereco`             |
+| `address_number`     | string     | `$cliente.endereco_numero`      |
+| `address_complement` | string     | `$cliente.endereco_complemento` |
+| `neighborhood`       | string     | `$cliente.bairro`               |
+| `city`               | string     | `$cliente.cidade`               |
+| `state`              | string     | `$cliente.estado`               |
+| `zip_code`           | string     | `$cliente.cep`                  |
+| `created_at`         | timestamp  | —                               |
+| `updated_at`         | timestamp  | —                               |
 
 ### 5.3 `contracts` (Contratos-base)
 
-| Coluna | Tipo | Descrição |
-|---|---|---|
-| `id` | UUID | — |
-| `user_id` | FK → users | Dono do contrato |
-| `title` | string | Nome descritivo |
-| `body` | longText | Conteúdo HTML com variáveis `$cliente.*` |
-| `original_file_path` | string nullable | Caminho do arquivo carregado originalmente |
-| `created_at` | timestamp | — |
-| `updated_at` | timestamp | — |
+| Coluna               | Tipo                     | Descrição                                                                      |
+| -------------------- | ------------------------ | ------------------------------------------------------------------------------ |
+| `id`                 | UUID                     | —                                                                              |
+| `user_id`            | FK → users               | Dono do contrato                                                               |
+| `title`              | string                   | Nome descritivo                                                                |
+| `body`               | longText                 | Conteúdo HTML com variáveis `$cliente.*`                                       |
+| `source_type`        | enum(`upload`, `manual`) | Forma de criação do contrato                                                   |
+| `original_file_path` | string nullable          | Caminho do arquivo `.doc`/`.docx` carregado (só quando `source_type = upload`) |
+| `created_at`         | timestamp                | —                                                                              |
+| `updated_at`         | timestamp                | —                                                                              |
 
 ### 5.4 `client_contracts` (Contratos por cliente)
 
-| Coluna | Tipo | Descrição |
-|---|---|---|
-| `id` | UUID | — |
-| `contract_id` | FK → contracts | Contrato-base |
-| `client_id` | FK → clients | Cliente vinculado |
-| `body` | longText | Cópia do body com variáveis substituídas |
-| `is_manually_edited`| boolean | True se o usuário editou manualmente após geração |
-| `generated_at` | timestamp nullable | Data da última geração automática |
-| `created_at` | timestamp | — |
-| `updated_at` | timestamp | — |
+| Coluna               | Tipo               | Descrição                                         |
+| -------------------- | ------------------ | ------------------------------------------------- |
+| `id`                 | UUID               | —                                                 |
+| `contract_id`        | FK → contracts     | Contrato-base                                     |
+| `client_id`          | FK → clients       | Cliente vinculado                                 |
+| `body`               | longText           | Cópia do body com variáveis substituídas          |
+| `is_manually_edited` | boolean            | True se o usuário editou manualmente após geração |
+| `generated_at`       | timestamp nullable | Data da última geração automática                 |
+| `created_at`         | timestamp          | —                                                 |
+| `updated_at`         | timestamp          | —                                                 |
 
 ---
 
 ## 6. Funcionalidades Detalhadas
 
-### F1 — Upload de Contrato-base
+### F1 — Criação de Contrato-base
 
 - O usuário autenticado acessa **Contratos > Novo**.
-- Faz upload de arquivo `.txt`, `.docx` ou `.html`.
-- O sistema extrai o conteúdo textual e armazena como HTML em `contracts.body`.
+- O formulário apresenta uma **seleção exclusiva de modo de criação** (Radio / Toggle):
+    - **"Fazer upload de arquivo Word"** — aceita `.doc` ou `.docx`.
+    - **"Escrever manualmente"** — exibe diretamente o editor WYSIWYG em branco.
+- Apenas **uma opção pode estar ativa** por vez; ao alternar, os campos da opção anterior ficam ocultos/desabilitados.
+
+**Modo: Upload de arquivo Word**
+
+- O usuário seleciona um arquivo `.doc` ou `.docx`.
+- O sistema extrai o conteúdo textual e preenche automaticamente o editor **"Corpo do Contrato"** com o conteúdo convertido para HTML.
 - O arquivo original é salvo em `storage/app/contracts/originals/{id}`.
 - O título é preenchido automaticamente pelo nome do arquivo (editável).
+- `contracts.source_type` é definido como `upload`.
 
-**Regras:**
-- Apenas arquivos de texto são aceitos (validação MIME).
-- Tamanho máximo: 5 MB.
+**Modo: Escrita manual**
+
+- O editor **"Corpo do Contrato"** é exibido em branco para entrada livre do usuário.
+- `contracts.source_type` é definido como `manual`.
+- Nenhum arquivo é armazenado; `original_file_path` permanece `null`.
+
+**Regras gerais:**
+
+- No modo upload, apenas `.doc` e `.docx` são aceitos (validação MIME real).
+- Tamanho máximo do arquivo: 5 MB.
+- O "Corpo do Contrato" (editor WYSIWYG) é sempre o único campo de edição de conteúdo, independentemente do modo escolhido.
 - O upload não cria `client_contracts` — só o contrato-base.
 
 ### F2 — Visualização e Edição do Contrato-base
 
-- O painel exibe o `body` em um editor WYSIWYG (TipTap via Filament).
+- O painel exibe o `body` em um editor WYSIWYG (TipTap via Filament) sob o rótulo **"Corpo do Contrato"**.
+- Se o contrato foi criado via upload, o conteúdo inicial do editor é o texto extraído do arquivo Word.
+- Se foi criado manualmente, o editor inicia com o conteúdo salvo anteriormente.
 - O usuário edita livremente, incluindo escrevendo variáveis `$cliente.*`.
 - Ao salvar, apenas `contracts.body` é atualizado.
 - Os `client_contracts` **não** são recalculados automaticamente — o usuário escolhe quando regenerar.
@@ -205,12 +226,12 @@ public function resolve(string $body, Client $client): string
 
 ### F7 — Contratos Originais vs. Contratos de Cliente
 
-| | Contrato-base (`contracts`) | Contrato do cliente (`client_contracts`) |
-|---|---|---|
-| Editável? | Sim, sempre | Sim, independentemente |
-| Contém variáveis? | Sim | Não (substituídas) |
-| Pode ser regenerado? | N/A | Sim (a partir do contrato-base) |
-| Exclusão | Remove também os client_contracts (soft delete recomendado) | Independente |
+|                      | Contrato-base (`contracts`)                                 | Contrato do cliente (`client_contracts`) |
+| -------------------- | ----------------------------------------------------------- | ---------------------------------------- |
+| Editável?            | Sim, sempre                                                 | Sim, independentemente                   |
+| Contém variáveis?    | Sim                                                         | Não (substituídas)                       |
+| Pode ser regenerado? | N/A                                                         | Sim (a partir do contrato-base)          |
+| Exclusão             | Remove também os client_contracts (soft delete recomendado) | Independente                             |
 
 ---
 
@@ -334,4 +355,4 @@ takeout enable mysql   # iniciar MySQL local
 
 ---
 
-*Última atualização: gerado automaticamente como documento-base do projeto ContractFlow.*
+_Última atualização: gerado automaticamente como documento-base do projeto ContractFlow._

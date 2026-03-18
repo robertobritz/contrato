@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Contracts\Schemas;
 
+use App\ContractSourceType;
+use App\Services\ContractImportService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ContractForm
 {
@@ -22,17 +26,45 @@ class ContractForm
                             ->label('Título')
                             ->required()
                             ->maxLength(255),
+
+                        ToggleButtons::make('source_type')
+                            ->label('Modo de criação')
+                            ->options([
+                                ContractSourceType::Upload->value => ContractSourceType::Upload->label(),
+                                ContractSourceType::Manual->value => ContractSourceType::Manual->label(),
+                            ])
+                            ->default(ContractSourceType::Manual->value)
+                            ->inline()
+                            ->live()
+                            ->required()
+                            ->hiddenOn('edit'),
+
                         FileUpload::make('original_file_path')
-                            ->label('Arquivo Original (opcional)')
+                            ->label('Arquivo Word (.doc ou .docx)')
                             ->directory('contracts/originals')
                             ->acceptedFileTypes([
-                                'text/plain',
-                                'text/html',
+                                'application/msword',
                                 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                             ])
                             ->maxSize(5120)
-                            ->hiddenOn('edit'),
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                                if (! $state instanceof TemporaryUploadedFile) {
+                                    return;
+                                }
+
+                                $importService = app(ContractImportService::class);
+
+                                if (blank($get('title'))) {
+                                    $set('title', $importService->generateTitle($state));
+                                }
+
+                                $set('body', $importService->extractContent($state));
+                            })
+                            ->hiddenOn('edit')
+                            ->visible(fn (callable $get): bool => $get('source_type') === ContractSourceType::Upload->value),
                     ]),
+
                 Section::make('Conteúdo')
                     ->schema([
                         RichEditor::make('body')

@@ -2,16 +2,20 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\ClientContracts\Pages\CreateClientContract;
+use App\Filament\Resources\ClientContracts\Pages\ListClientContracts;
 use App\Models\Client;
 use App\Models\ClientContract;
 use App\Models\Contract;
 use App\Models\User;
 use App\Services\ClientContractGenerator;
+use Livewire\Livewire;
+use Tests\TestCase;
 
 use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
-    /** @var \Tests\TestCase&object{user: \App\Models\User} $this */
+    /** @var TestCase&object{user: User} $this */
     $this->user = User::factory()->create();
     actingAs($this->user);
 });
@@ -99,4 +103,38 @@ it('cascades deletion when contract is deleted', function () {
     $contract->delete();
 
     expect(ClientContract::query()->count())->toBe(0);
+});
+
+it('can access the create client contract page', function () {
+    Livewire::test(CreateClientContract::class)
+        ->assertOk();
+});
+
+it('can create a client contract from the form selecting contract and client', function () {
+    $client = Client::factory()->for($this->user)->create(['name' => 'Fernanda']);
+    $contract = Contract::factory()->for($this->user)->create([
+        'body' => '<p>Olá $cliente.nome.</p>',
+    ]);
+
+    Livewire::test(CreateClientContract::class)
+        ->fillForm([
+            'contract_id' => $contract->id,
+            'client_id' => $client->id,
+        ])
+        ->call('create')
+        ->assertNotified()
+        ->assertRedirect();
+
+    $clientContract = ClientContract::query()
+        ->where('contract_id', $contract->id)
+        ->where('client_id', $client->id)
+        ->first();
+
+    expect($clientContract)->not->toBeNull()
+        ->and($clientContract->body)->toContain('Fernanda');
+});
+
+it('shows the new contrato do cliente button in the list', function () {
+    Livewire::test(ListClientContracts::class)
+        ->assertOk();
 });

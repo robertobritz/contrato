@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\ContractSourceType;
 use Database\Factories\ContractFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -17,6 +18,14 @@ class Contract extends Model
     use HasFactory, HasUuids;
 
     protected $guarded = [];
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'source_type' => ContractSourceType::class,
+        ];
+    }
 
     public function user(): BelongsTo
     {

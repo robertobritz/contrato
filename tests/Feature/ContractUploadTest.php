@@ -2,18 +2,20 @@
 
 declare(strict_types=1);
 
+use App\ContractSourceType;
 use App\Filament\Resources\Contracts\Pages\CreateContract;
 use App\Filament\Resources\Contracts\Pages\EditContract;
 use App\Filament\Resources\Contracts\Pages\ListContracts;
 use App\Models\Contract;
 use App\Models\User;
 use Livewire\Livewire;
+use Tests\TestCase;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 
 beforeEach(function () {
-    /** @var \Tests\TestCase&object{user: \App\Models\User} $this */
+    /** @var TestCase&object{user: User} $this */
     $this->user = User::factory()->create();
     actingAs($this->user);
 });
@@ -37,10 +39,11 @@ it('cannot see other users contracts', function () {
         ->assertCanNotSeeTableRecords([$otherContract]);
 });
 
-it('can create a contract with body', function () {
+it('can create a contract in manual mode', function () {
     Livewire::test(CreateContract::class)
         ->fillForm([
             'title' => 'Contrato de Locação',
+            'source_type' => ContractSourceType::Manual->value,
             'body' => '<p>Contrato para $cliente.nome</p>',
         ])
         ->call('create')
@@ -50,7 +53,24 @@ it('can create a contract with body', function () {
     assertDatabaseHas(Contract::class, [
         'title' => 'Contrato de Locação',
         'user_id' => $this->user->id,
+        'source_type' => ContractSourceType::Manual->value,
+        'original_file_path' => null,
     ]);
+});
+
+it('sets source_type to manual when creating without upload', function () {
+    Livewire::test(CreateContract::class)
+        ->fillForm([
+            'title' => 'Contrato Manual',
+            'source_type' => ContractSourceType::Manual->value,
+            'body' => '<p>Texto do contrato</p>',
+        ])
+        ->call('create')
+        ->assertNotified();
+
+    $contract = Contract::where('title', 'Contrato Manual')->first();
+
+    expect($contract->source_type)->toBe(ContractSourceType::Manual);
 });
 
 it('can edit a contract body', function () {

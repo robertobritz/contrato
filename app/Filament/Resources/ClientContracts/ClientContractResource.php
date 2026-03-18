@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\ClientContracts;
 
+use App\Filament\Resources\ClientContracts\Pages\CreateClientContract;
 use App\Filament\Resources\ClientContracts\Pages\EditClientContract;
 use App\Filament\Resources\ClientContracts\Pages\ListClientContracts;
 use App\Filament\Resources\ClientContracts\Schemas\ClientContractForm;
@@ -39,12 +40,7 @@ class ClientContractResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereHas('contract', fn (Builder $query) => $query->where('user_id', auth()->id()));
-    }
-
-    public static function canCreate(): bool
-    {
-        return false;
+            ->whereHas('contract', fn(Builder $query) => $query->where('user_id', auth()->id()));
     }
 
     public static function getRelations(): array
@@ -56,6 +52,7 @@ class ClientContractResource extends Resource
     {
         return [
             'index' => ListClientContracts::route('/'),
+            'create' => CreateClientContract::route('/create'),
             'edit' => EditClientContract::route('/{record}/edit'),
         ];
     }
