@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\MaritalStatus;
 use App\Models\Contract;
+use App\Models\Contratado;
 use App\Models\Contratante;
+use App\Models\ObjetoContrato;
 use App\Models\User;
 use App\Services\ContractVariableResolver;
 
@@ -100,4 +102,49 @@ it('detects unresolved variables', function () {
         ->toContain('$contratante.rg')
         ->toContain('$contratante.nascimento')
         ->not->toContain('$contratante.nome');
+});
+
+it('resolves contratado variables alongside contratante variables', function () {
+    $user = User::factory()->create();
+    $contratante = Contratante::factory()->for($user)->create(['name' => 'João Contratante', 'cpf' => '111.111.111-11']);
+    $contratado = Contratado::factory()->for($user)->create(['name' => 'Ana Contratada', 'cpf' => '222.222.222-22']);
+
+    $body = 'Contratante: $contratante.nome ($contratante.cpf) — Contratado: $contratado.nome ($contratado.cpf)';
+
+    $resolver = app(ContractVariableResolver::class);
+    $result = $resolver->resolve($body, $contratante, $contratado);
+
+    expect($result)
+        ->toContain('João Contratante')
+        ->toContain('111.111.111-11')
+        ->toContain('Ana Contratada')
+        ->toContain('222.222.222-22')
+        ->not->toContain('$contratante.')
+        ->not->toContain('$contratado.');
+});
+
+it('resolves objeto contrato variables', function () {
+    $user = User::factory()->create();
+    $contratante = Contratante::factory()->for($user)->create();
+    $contratado = Contratado::factory()->for($user)->create();
+    $objeto = ObjetoContrato::factory()->create([
+        'contratante_id' => $contratante->id,
+        'contratado_id' => $contratado->id,
+        'tipo' => 'servico',
+        'descricao' => 'Consultoria Jurídica',
+        'quantidade' => '10.00',
+        'unidade' => 'hr',
+        'valor' => '200.00',
+    ]);
+
+    $body = 'Objeto: $objeto.descricao, tipo: $objeto.tipo, qtd: $objeto.quantidade $objeto.unidade, valor: $objeto.valor';
+
+    $resolver = app(ContractVariableResolver::class);
+    $result = $resolver->resolve($body, $contratante, $contratado, $objeto);
+
+    expect($result)
+        ->toContain('Consultoria Jurídica')
+        ->toContain('servico')
+        ->toContain('hr')
+        ->not->toContain('$objeto.');
 });

@@ -188,7 +188,7 @@ Partes contratadas. Mesma estrutura de campos que `contratantes`, com variáveis
 - Se o contrato foi criado via upload, o conteúdo inicial do editor é o texto extraído do arquivo Word.
 - Se foi criado manualmente, o editor inicia com o conteúdo salvo anteriormente.
 - O usuário edita livremente, incluindo escrevendo variáveis `$contratante.*` e `$contratado.*`.
-- Um **botão flutuante "Variáveis"** (fixo no canto inferior direito, segue a rolagem da tela) exibe a lista de variáveis de contratante disponíveis. O painel mostra apenas o rótulo de cada variável; ao clicar no ícone de copiar, a variável é copiada para a área de transferência e o painel é fechado automaticamente para facilitar a inserção no editor. Um **contador numérico** exibido ao lado de cada variável indica quantas vezes ela já foi utilizada no contrato (atualizado em tempo real a cada segundo). O botão flutuante está disponível tanto na **criação** quanto na **edição** de contratos.
+- Um **botão flutuante "Variáveis"** (fixo no canto inferior direito, segue a rolagem da tela) exibe três seções colapsáveis de variáveis disponíveis: **Variáveis de Contratante**, **Variáveis de Contratado** e **Variáveis do Objeto de Contrato**. Cada seção pode ser expandida ou retraída clicando no respectivo cabeçalho. O painel mostra apenas o rótulo de cada variável; ao clicar no ícone de copiar, a variável é inserida no editor na posição do cursor e o painel é fechado automaticamente. Um **contador numérico** exibido ao lado de cada variável indica quantas vezes ela já foi utilizada no contrato (atualizado em tempo real a cada segundo). O botão flutuante está disponível tanto na **criação** quanto na **edição** de contratos.
 - Ao salvar, apenas `contracts.body` é atualizado.
 - Os `contratante_contracts` **não** são recalculados automaticamente — o usuário escolhe quando regenerar.
 
@@ -234,6 +234,16 @@ $contratante.cep               → zip_code
 ```
 
 Idem para contratado com prefixo `$contratado.*`.
+
+**Mapeamento de Objeto de Contrato** (`$objeto.{chave}` → `objeto_contratos.{coluna}`):
+
+```
+$objeto.tipo               → tipo
+$objeto.descricao          → descricao
+$objeto.quantidade         → quantidade
+$objeto.unidade            → unidade
+$objeto.valor              → valor
+```
 
 **Implementação via Service:**
 
