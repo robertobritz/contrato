@@ -1,0 +1,221 @@
+classDiagram
+    %% ─── Models ───────────────────────────────────────────────────────────────
+
+    class User {
+        +uuid id
+        +string name
+        +string email
+        +string password
+        +bool is_admin
+        +datetime email_verified_at
+        +contratantes() HasMany
+        +contratados() HasMany
+        +contracts() HasMany
+    }
+
+    class Contract {
+        +uuid id
+        +uuid user_id
+        +string title
+        +string body
+        +ContractSourceType source_type
+        +ContractType contract_type
+        +user() BelongsTo
+        +contratanteContracts() HasMany
+    }
+
+    class Contratante {
+        +uuid id
+        +uuid user_id
+        +string name
+        +string email
+        +string phone
+        +string cpf
+        +string rg
+        +date birth_date
+        +string nationality
+        +MaritalStatus marital_status
+        +DocumentType document_type
+        +string profession
+        +string address
+        +string address_number
+        +string address_complement
+        +string neighborhood
+        +string city
+        +string state
+        +string zip_code
+        +user() BelongsTo
+        +contratanteContracts() HasMany
+    }
+
+    class Contratado {
+        +uuid id
+        +uuid user_id
+        +string name
+        +string email
+        +string phone
+        +string cpf
+        +string rg
+        +date birth_date
+        +string nationality
+        +MaritalStatus marital_status
+        +DocumentType document_type
+        +string profession
+        +string address
+        +string address_number
+        +string address_complement
+        +string neighborhood
+        +string city
+        +string state
+        +string zip_code
+        +user() BelongsTo
+        +objetoContratos() HasMany
+    }
+
+    class ContratanteContract {
+        +uuid id
+        +uuid contract_id
+        +uuid contratante_id
+        +uuid contratado_id
+        +uuid objeto_contrato_id
+        +string body
+        +bool is_manually_edited
+        +datetime generated_at
+        +contract() BelongsTo
+        +contratante() BelongsTo
+        +contratado() BelongsTo
+        +objetoContrato() BelongsTo
+    }
+
+    class ObjetoContrato {
+        +uuid id
+        +uuid contratante_id
+        +uuid contratado_id
+        +string tipo
+        +string descricao
+        +decimal quantidade
+        +string unidade
+        +decimal valor
+        +contratante() BelongsTo
+        +contratado() BelongsTo
+    }
+
+    %% ─── Enums ────────────────────────────────────────────────────────────────
+
+    class ContractSourceType {
+        <<enumeration>>
+        Upload
+        Manual
+    }
+
+    class ContractType {
+        <<enumeration>>
+        Locacao
+        CompraVenda
+        PrestacaoServico
+    }
+
+    class DocumentType {
+        <<enumeration>>
+        CPF
+        CNPJ
+    }
+
+    class MaritalStatus {
+        <<enumeration>>
+        Solteiro
+        Casado
+        Divorciado
+        Viuvo
+        SeparadoJudicialmente
+        UniaoEstavel
+    }
+
+    %% ─── Services ─────────────────────────────────────────────────────────────
+
+    class ClientContractGenerator {
+        <<service>>
+        -ContractVariableResolver resolver
+        +generate(Contract, Contratante, ?Contratado, ?ObjetoContrato) ContratanteContract
+    }
+
+    class ContractVariableResolver {
+        <<service>>
+        +resolve(string, Contratante, ?Contratado, ?ObjetoContrato) string
+        +unresolvedVariables(string, Contratante, ?Contratado, ?ObjetoContrato) array
+    }
+
+    class ContractExportService {
+        <<service>>
+        +toPdfContent(ContratanteContract) string
+        +toDocxContent(ContratanteContract) string
+    }
+
+    class ContractImportService {
+        <<service>>
+        +extractContent(UploadedFile|string) string
+    }
+
+    %% ─── Policies ─────────────────────────────────────────────────────────────
+
+    class ContractPolicy {
+        <<policy>>
+        +viewAny(User) bool
+        +view(User, Contract) bool
+        +create(User) bool
+        +update(User, Contract) bool
+        +delete(User, Contract) bool
+    }
+
+    class ClientPolicy {
+        <<policy>>
+        +viewAny(User) bool
+        +view(User, Client) bool
+        +create(User) bool
+        +update(User, Client) bool
+        +delete(User, Client) bool
+    }
+
+    %% ─── Eloquent Relationships ────────────────────────────────────────────────
+
+    User "1" --> "0..*" Contract : owns
+    User "1" --> "0..*" Contratante : owns
+    User "1" --> "0..*" Contratado : owns
+
+    Contract "1" --> "0..*" ContratanteContract : generates
+    Contratante "1" --> "0..*" ContratanteContract : appears in
+    Contratado "1" --> "0..*" ContratanteContract : appears in
+    ObjetoContrato "1" --> "0..*" ContratanteContract : scopes
+
+    Contratante "1" --> "0..*" ObjetoContrato : owns
+    Contratado "1" --> "0..*" ObjetoContrato : provides
+
+    %% ─── Enum Usage ────────────────────────────────────────────────────────────
+
+    Contract ..> ContractSourceType : uses
+    Contract ..> ContractType : uses
+    Contratante ..> DocumentType : uses
+    Contratante ..> MaritalStatus : uses
+    Contratado ..> DocumentType : uses
+    Contratado ..> MaritalStatus : uses
+
+    %% ─── Service Dependencies ──────────────────────────────────────────────────
+
+    ClientContractGenerator ..> ContractVariableResolver : injects
+    ClientContractGenerator ..> Contract : reads
+    ClientContractGenerator ..> Contratante : reads
+    ClientContractGenerator ..> Contratado : reads
+    ClientContractGenerator ..> ObjetoContrato : reads
+    ClientContractGenerator ..> ContratanteContract : creates
+
+    ContractVariableResolver ..> Contratante : reads
+    ContractVariableResolver ..> Contratado : reads
+    ContractVariableResolver ..> ObjetoContrato : reads
+
+    ContractExportService ..> ContratanteContract : exports
+
+    %% ─── Policy Authorization ───────────────────────────────────────────────────
+
+    ContractPolicy ..> Contract : authorizes
+    ContractPolicy ..> User : authorizes
+    ClientPolicy ..> User : authorizes
