@@ -1,50 +1,44 @@
 @php
     use App\Models\Client;
     $variables = Client::availableVariableLabels();
+    $initialCounts = array_fill_keys(array_keys($variables), 0);
 @endphp
 
-<script>
-    function contratoCopyVar(text) {
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(text).catch(function() {
-                contratoCopyLegacy(text);
-            });
-            return;
-        }
-        contratoCopyLegacy(text);
-    }
-
-    function contratoCopyLegacy(text) {
-        var el = document.createElement('input');
-        el.setAttribute('type', 'text');
-        el.setAttribute('value', text);
-        el.setAttribute('readonly', '');
-        el.style.cssText = 'position:fixed;top:0;left:0;width:2px;height:2px;opacity:0.01;z-index:99999;';
-        document.body.appendChild(el);
-        el.focus({
-            preventScroll: true
-        });
-        if (navigator.userAgent.match(/ipad|ipod|iphone/i)) {
-            var r = document.createRange();
-            r.selectNodeContents(el);
-            var s = window.getSelection();
-            if (s) {
-                s.removeAllRanges();
-                s.addRange(r);
+<div
+    x-data="{
+        open: false,
+        savedRange: null,
+        counts: {{ \Illuminate\Support\Js::from($initialCounts) }},
+        saveEditorSelection() {
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount > 0) {
+                this.savedRange = sel.getRangeAt(0).cloneRange();
             }
-            el.setSelectionRange(0, 999999);
-        } else {
-            el.select();
-            el.setSelectionRange(0, 999999);
+        },
+        insertVariable(text) {
+            this.open = false;
+            const editor = document.querySelector('.tiptap[contenteditable]');
+            if (!editor) { return; }
+            editor.focus();
+            if (this.savedRange) {
+                const sel = window.getSelection();
+                if (sel) {
+                    sel.removeAllRanges();
+                    sel.addRange(this.savedRange);
+                }
+            }
+            document.execCommand('insertText', false, text);
+        },
+        updateCounts() {
+            const el = document.querySelector('.tiptap[contenteditable]');
+            const text = el ? (el.innerText || el.textContent || '') : '';
+            @foreach ($variables as $variable => $label)
+                this.counts[{{ \Illuminate\Support\Js::from($variable) }}] = text.split({{ \Illuminate\Support\Js::from($variable) }}).length - 1;
+            @endforeach
         }
-        try {
-            document.execCommand('copy');
-        } catch (e) {}
-        document.body.removeChild(el);
-    }
-</script>
-
-<div x-data="{ open: false }" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;">
+    }"
+    x-init="updateCounts(); setInterval(() => updateCounts(), 1000);"
+    style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;">
 
     {{-- Painel de variáveis --}}
     <div x-show="open" x-transition:enter="transition ease-out duration-200"
@@ -66,10 +60,13 @@
                     <span
                         style="font-size:0.8rem;color:#9ca3af;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ $label }}</span>
                     <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
-                        <code
-                            style="font-family:monospace;font-size:0.78rem;font-weight:600;color:#f59e0b;background:rgba(245,158,11,0.1);padding:0.15rem 0.4rem;border-radius:4px;">{{ $variable }}</code>
-                        <button type="button" title="Copiar variável" data-variable="{{ $variable }}"
-                            @click.stop="open = false; contratoCopyVar($el.dataset.variable)"
+                        {{-- Contador de usos da variável no contrato --}}
+                        <span x-show="counts[{{ \Illuminate\Support\Js::from($variable) }}] > 0"
+                            x-text="counts[{{ \Illuminate\Support\Js::from($variable) }}]"
+                            title="Número de vezes que esta variável aparece no contrato"
+                            style="font-size:0.7rem;font-weight:700;color:#f59e0b;background:rgba(245,158,11,0.15);padding:0.1rem 0.45rem;border-radius:999px;min-width:1.4rem;text-align:center;line-height:1.6;"></span>
+                        <button type="button" title="Inserir variável" data-variable="{{ $variable }}"
+                            @click.stop="insertVariable($el.dataset.variable)"
                             style="display:flex;align-items:center;justify-content:center;background:none;border:none;padding:6px;cursor:pointer;color:#6b7280;border-radius:4px;min-width:32px;min-height:32px;"
                             onmouseover="this.style.color='#f59e0b'" onmouseout="this.style.color='#6b7280'">
                             <svg style="width:16px;height:16px;" fill="none" viewBox="0 0 24 24"
@@ -85,7 +82,7 @@
     </div>
 
     {{-- Botão circular flutuante --}}
-    <button type="button" @click="open = !open" title="Variáveis disponíveis"
+    <button type="button" @click="if (!open) { saveEditorSelection(); } open = !open" title="Variáveis disponíveis"
         style="width:3.5rem;height:3.5rem;border-radius:50%;background:#f59e0b;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(245,158,11,0.5);transition:background 0.2s,transform 0.2s;"
         onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">
         <svg x-show="!open" style="width:22px;height:22px;color:#fff;" fill="none" viewBox="0 0 24 24"

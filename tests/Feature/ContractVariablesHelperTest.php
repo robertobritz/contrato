@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Filament\Resources\Contracts\Pages\CreateContract;
 use App\Filament\Resources\Contracts\Pages\EditContract;
 use App\Models\Client;
 use App\Models\Contract;
@@ -58,10 +59,32 @@ it('shows contract body editor on edit contract form', function () {
         ->assertOk();
 });
 
-it('renders floating variables button on edit contract page', function () {
+it('renders floating variables panel without inline variable code display', function () {
     $this->view('filament.contract-variables-floating')
         ->assertSee('Variáveis de Cliente Disponíveis')
-        ->assertSee('$cliente.nome')
-        ->assertSee('$cliente.cpf')
-        ->assertSee('Copiar variável');
+        ->assertSee('Inserir variável')
+        ->assertSee('data-variable="$cliente.nome"', false)
+        ->assertSee('data-variable="$cliente.cpf"', false)
+        ->assertDontSee('<code', false);
+});
+
+it('renders floating variables panel with usage counter markup', function () {
+    $this->view('filament.contract-variables-floating')
+        ->assertSee('x-text', false)
+        ->assertSee('updateCounts', false)
+        ->assertSee('setInterval', false);
+});
+
+it('renders floating variables button on create contract page', function () {
+    $contract = Contract::factory()->for($this->user)->create();
+
+    Livewire::test(CreateContract::class)
+        ->assertOk();
+});
+
+it('renders floating variables button on edit contract page', function () {
+    $contract = Contract::factory()->for($this->user)->create();
+
+    Livewire::test(EditContract::class, ['record' => $contract->getRouteKey()])
+        ->assertOk();
 });

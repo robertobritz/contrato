@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\Contracts\Pages\CreateContract;
 use App\Filament\Resources\Contracts\Pages\EditContract;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -45,8 +46,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::PAGE_END,
-                fn() => view('filament.contract-variables-floating'),
-                scopes: EditContract::class,
+                fn () => view('filament.contract-variables-floating'),
+                scopes: [EditContract::class, CreateContract::class],
             )
             ->middleware([
                 EncryptCookies::class,
