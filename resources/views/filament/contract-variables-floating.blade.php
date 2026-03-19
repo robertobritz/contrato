@@ -1,44 +1,42 @@
 @php
-    use App\Models\Client;
-    $variables = Client::availableVariableLabels();
+    use App\Models\Contratante;
+    $variables = Contratante::availableVariableLabels();
     $initialCounts = array_fill_keys(array_keys($variables), 0);
 @endphp
 
-<div
-    x-data="{
-        open: false,
-        savedRange: null,
-        counts: {{ \Illuminate\Support\Js::from($initialCounts) }},
-        saveEditorSelection() {
-            const sel = window.getSelection();
-            if (sel && sel.rangeCount > 0) {
-                this.savedRange = sel.getRangeAt(0).cloneRange();
-            }
-        },
-        insertVariable(text) {
-            this.open = false;
-            const editor = document.querySelector('.tiptap[contenteditable]');
-            if (!editor) { return; }
-            editor.focus();
-            if (this.savedRange) {
-                const sel = window.getSelection();
-                if (sel) {
-                    sel.removeAllRanges();
-                    sel.addRange(this.savedRange);
-                }
-            }
-            document.execCommand('insertText', false, text);
-        },
-        updateCounts() {
-            const el = document.querySelector('.tiptap[contenteditable]');
-            const text = el ? (el.innerText || el.textContent || '') : '';
-            @foreach ($variables as $variable => $label)
-                this.counts[{{ \Illuminate\Support\Js::from($variable) }}] = text.split({{ \Illuminate\Support\Js::from($variable) }}).length - 1;
-            @endforeach
+<div x-data="{
+    open: false,
+    savedRange: null,
+    counts: {{ \Illuminate\Support\Js::from($initialCounts) }},
+    saveEditorSelection() {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) {
+            this.savedRange = sel.getRangeAt(0).cloneRange();
         }
-    }"
-    x-init="updateCounts(); setInterval(() => updateCounts(), 1000);"
-    style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;">
+    },
+    insertVariable(text) {
+        this.open = false;
+        const editor = document.querySelector('.tiptap[contenteditable]');
+        if (!editor) { return; }
+        editor.focus();
+        if (this.savedRange) {
+            const sel = window.getSelection();
+            if (sel) {
+                sel.removeAllRanges();
+                sel.addRange(this.savedRange);
+            }
+        }
+        document.execCommand('insertText', false, text);
+    },
+    updateCounts() {
+        const el = document.querySelector('.tiptap[contenteditable]');
+        const text = el ? (el.innerText || el.textContent || '') : '';
+        @foreach($variables as $variable => $label)
+        this.counts[{{ \Illuminate\Support\Js::from($variable) }}] = text.split({{ \Illuminate\Support\Js::from($variable) }}).length - 1;
+        @endforeach
+    }
+}" x-init="updateCounts();
+setInterval(() => updateCounts(), 1000);" style="position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;">
 
     {{-- Painel de variáveis --}}
     <div x-show="open" x-transition:enter="transition ease-out duration-200"
@@ -48,7 +46,8 @@
         style="position:absolute;bottom:4.5rem;right:0;width:22rem;border-radius:0.75rem;overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.12);">
         {{-- Cabeçalho --}}
         <div style="padding:0.75rem 1rem;border-bottom:1px solid rgba(255,255,255,0.08);background:#1f2937;">
-            <p style="margin:0;font-size:0.85rem;font-weight:600;color:#f9fafb;">Variáveis de Cliente Disponíveis</p>
+            <p style="margin:0;font-size:0.85rem;font-weight:600;color:#f9fafb;">Variáveis de Contratante Disponíveis
+            </p>
             <p style="margin:0.25rem 0 0;font-size:0.75rem;color:#9ca3af;">Clique em copiar para fechar e inserir no
                 contrato</p>
         </div>

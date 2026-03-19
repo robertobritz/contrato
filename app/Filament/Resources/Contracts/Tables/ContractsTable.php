@@ -20,9 +20,9 @@ class ContractsTable
                     ->label('Título')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('client_contracts_count')
-                    ->label('Clientes Vinculados')
-                    ->counts('clientContracts')
+                TextColumn::make('contratante_contracts_count')
+                    ->label('Contratantes Vinculados')
+                    ->counts('contratanteContracts')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Criado em')

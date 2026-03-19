@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use App\Filament\Resources\Contracts\Pages\CreateContract;
 use App\Filament\Resources\Contracts\Pages\EditContract;
-use App\Models\Client;
 use App\Models\Contract;
+use App\Models\Contratante;
 use App\Models\User;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -18,35 +18,35 @@ beforeEach(function () {
     actingAs($this->user);
 });
 
-it('returns all 16 client variables with labels', function () {
-    $variables = Client::availableVariableLabels();
+it('returns all 16 contratante variables with labels', function () {
+    $variables = Contratante::availableVariableLabels();
 
     expect($variables)
         ->toBeArray()
         ->toHaveCount(16)
-        ->toHaveKey('$cliente.nome')
-        ->toHaveKey('$cliente.email')
-        ->toHaveKey('$cliente.telefone')
-        ->toHaveKey('$cliente.cpf')
-        ->toHaveKey('$cliente.rg')
-        ->toHaveKey('$cliente.nascimento')
-        ->toHaveKey('$cliente.nacionalidade')
-        ->toHaveKey('$cliente.estado_civil')
-        ->toHaveKey('$cliente.profissao')
-        ->toHaveKey('$cliente.endereco')
-        ->toHaveKey('$cliente.endereco_numero')
-        ->toHaveKey('$cliente.endereco_complemento')
-        ->toHaveKey('$cliente.bairro')
-        ->toHaveKey('$cliente.cidade')
-        ->toHaveKey('$cliente.estado')
-        ->toHaveKey('$cliente.cep');
+        ->toHaveKey('$contratante.nome')
+        ->toHaveKey('$contratante.email')
+        ->toHaveKey('$contratante.telefone')
+        ->toHaveKey('$contratante.cpf')
+        ->toHaveKey('$contratante.rg')
+        ->toHaveKey('$contratante.nascimento')
+        ->toHaveKey('$contratante.nacionalidade')
+        ->toHaveKey('$contratante.estado_civil')
+        ->toHaveKey('$contratante.profissao')
+        ->toHaveKey('$contratante.endereco')
+        ->toHaveKey('$contratante.endereco_numero')
+        ->toHaveKey('$contratante.endereco_complemento')
+        ->toHaveKey('$contratante.bairro')
+        ->toHaveKey('$contratante.cidade')
+        ->toHaveKey('$contratante.estado')
+        ->toHaveKey('$contratante.cep');
 });
 
 it('available variable labels keys match variable map keys', function () {
-    $client = Client::factory()->for($this->user)->create();
+    $contratante = Contratante::factory()->for($this->user)->create();
 
-    $helperKeys = array_keys(Client::availableVariableLabels());
-    $mapKeys = array_keys($client->variableMap());
+    $helperKeys = array_keys(Contratante::availableVariableLabels());
+    $mapKeys = array_keys($contratante->variableMap());
 
     expect($helperKeys)->toBe($mapKeys);
 });
@@ -61,10 +61,10 @@ it('shows contract body editor on edit contract form', function () {
 
 it('renders floating variables panel without inline variable code display', function () {
     $this->view('filament.contract-variables-floating')
-        ->assertSee('Variáveis de Cliente Disponíveis')
+        ->assertSee('Variáveis de Contratante Disponíveis')
         ->assertSee('Inserir variável')
-        ->assertSee('data-variable="$cliente.nome"', false)
-        ->assertSee('data-variable="$cliente.cpf"', false)
+        ->assertSee('data-variable="$contratante.nome"', false)
+        ->assertSee('data-variable="$contratante.cpf"', false)
         ->assertDontSee('<code', false);
 });
 

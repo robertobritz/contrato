@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Filament\Resources\Contracts\RelationManagers;
 
-use App\Models\Client;
-use App\Models\ClientContract;
+use App\Models\Contratante;
+use App\Models\ContratanteContract;
 use App\Services\ClientContractGenerator;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -23,9 +23,9 @@ use Filament\Tables\Table;
 
 class ClientContractsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'clientContracts';
+    protected static string $relationship = 'contratanteContracts';
 
-    protected static ?string $title = 'Clientes Vinculados';
+    protected static ?string $title = 'Contratantes Vinculados';
 
     public function form(Schema $schema): Schema
     {
@@ -41,13 +41,13 @@ class ClientContractsRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('client.name')
+            ->recordTitleAttribute('contratante.name')
             ->columns([
-                TextColumn::make('client.name')
-                    ->label('Cliente')
+                TextColumn::make('contratante.name')
+                    ->label('Contratante')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('client.cpf')
+                TextColumn::make('contratante.cpf')
                     ->label('CPF'),
                 IconColumn::make('is_manually_edited')
                     ->label('Editado Manualmente')
@@ -61,21 +61,21 @@ class ClientContractsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Action::make('vincular_cliente')
-                    ->label('Vincular Cliente')
+                Action::make('vincular_contratante')
+                    ->label('Vincular Contratante')
                     ->icon('heroicon-o-user-plus')
                     ->form([
-                        Select::make('client_id')
-                            ->label('Cliente')
+                        Select::make('contratante_id')
+                            ->label('Contratante')
                             ->options(function () {
                                 $contractId = $this->getOwnerRecord()->getKey();
-                                $existingClientIds = ClientContract::query()
+                                $existingContratanteIds = ContratanteContract::query()
                                     ->where('contract_id', $contractId)
-                                    ->pluck('client_id');
+                                    ->pluck('contratante_id');
 
-                                return Client::query()
+                                return Contratante::query()
                                     ->where('user_id', auth()->id())
-                                    ->whereNotIn('id', $existingClientIds)
+                                    ->whereNotIn('id', $existingContratanteIds)
                                     ->pluck('name', 'id');
                             })
                             ->searchable()
@@ -83,13 +83,13 @@ class ClientContractsRelationManager extends RelationManager
                     ])
                     ->action(function (array $data) {
                         $contract = $this->getOwnerRecord();
-                        $client = Client::findOrFail($data['client_id']);
+                        $contratante = Contratante::findOrFail($data['contratante_id']);
 
-                        app(ClientContractGenerator::class)->generate($contract, $client);
+                        app(ClientContractGenerator::class)->generate($contract, $contratante);
 
                         Notification::make()
                             ->success()
-                            ->title('Cliente vinculado com sucesso!')
+                            ->title('Contratante vinculado com sucesso!')
                             ->send();
                     }),
             ])
@@ -107,7 +107,7 @@ class ClientContractsRelationManager extends RelationManager
                     ->requiresConfirmation()
                     ->modalHeading('Regenerar Contrato')
                     ->modalDescription('Isso sobrescreverá o conteúdo atual do contrato com uma nova geração a partir do contrato-base. Edições manuais serão perdidas.')
-                    ->action(function (ClientContract $record) {
+                    ->action(function (ContratanteContract $record) {
                         app(ClientContractGenerator::class)->regenerate($record);
 
                         Notification::make()

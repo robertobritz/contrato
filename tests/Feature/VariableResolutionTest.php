@@ -3,14 +3,14 @@
 declare(strict_types=1);
 
 use App\MaritalStatus;
-use App\Models\Client;
 use App\Models\Contract;
+use App\Models\Contratante;
 use App\Models\User;
 use App\Services\ContractVariableResolver;
 
-it('resolves all client variables in a contract body', function () {
+it('resolves all contratante variables in a contract body', function () {
     $user = User::factory()->create();
-    $client = Client::factory()->for($user)->create([
+    $contratante = Contratante::factory()->for($user)->create([
         'name' => 'Carlos Eduardo',
         'email' => 'carlos@email.com',
         'phone' => '(21) 98765-4321',
@@ -30,15 +30,15 @@ it('resolves all client variables in a contract body', function () {
     ]);
 
     $contract = Contract::factory()->for($user)->create([
-        'body' => '<p>Eu, $cliente.nome, $cliente.nacionalidade, $cliente.estado_civil, $cliente.profissao, '
-            .'portador do CPF nº $cliente.cpf e RG nº $cliente.rg, nascido em $cliente.nascimento, '
-            .'residente na $cliente.endereco, nº $cliente.endereco_numero, $cliente.endereco_complemento, '
-            .'bairro $cliente.bairro, $cliente.cidade/$cliente.estado, CEP $cliente.cep, '
-            .'e-mail $cliente.email, telefone $cliente.telefone.</p>',
+        'body' => '<p>Eu, $contratante.nome, $contratante.nacionalidade, $contratante.estado_civil, $contratante.profissao, '
+            . 'portador do CPF nº $contratante.cpf e RG nº $contratante.rg, nascido em $contratante.nascimento, '
+            . 'residente na $contratante.endereco, nº $contratante.endereco_numero, $contratante.endereco_complemento, '
+            . 'bairro $contratante.bairro, $contratante.cidade/$contratante.estado, CEP $contratante.cep, '
+            . 'e-mail $contratante.email, telefone $contratante.telefone.</p>',
     ]);
 
     $resolver = app(ContractVariableResolver::class);
-    $result = $resolver->resolve($contract->body, $client);
+    $result = $resolver->resolve($contract->body, $contratante);
 
     expect($result)
         ->toContain('Carlos Eduardo')
@@ -57,12 +57,12 @@ it('resolves all client variables in a contract body', function () {
         ->toContain('01310-100')
         ->toContain('carlos@email.com')
         ->toContain('(21) 98765-4321')
-        ->not->toContain('$cliente.');
+        ->not->toContain('$contratante.');
 });
 
-it('keeps unresolved variables when client fields are empty', function () {
+it('keeps unresolved variables when contratante fields are empty', function () {
     $user = User::factory()->create();
-    $client = Client::factory()->for($user)->create([
+    $contratante = Contratante::factory()->for($user)->create([
         'name' => 'Maria',
         'email' => 'maria@email.com',
         'cpf' => '999.888.777-66',
@@ -70,20 +70,20 @@ it('keeps unresolved variables when client fields are empty', function () {
         'profession' => null,
     ]);
 
-    $body = 'Nome: $cliente.nome, RG: $cliente.rg, Profissão: $cliente.profissao';
+    $body = 'Nome: $contratante.nome, RG: $contratante.rg, Profissão: $contratante.profissao';
 
     $resolver = app(ContractVariableResolver::class);
-    $result = $resolver->resolve($body, $client);
+    $result = $resolver->resolve($body, $contratante);
 
     expect($result)
         ->toContain('Maria')
-        ->toContain('$cliente.rg')
-        ->toContain('$cliente.profissao');
+        ->toContain('$contratante.rg')
+        ->toContain('$contratante.profissao');
 });
 
 it('detects unresolved variables', function () {
     $user = User::factory()->create();
-    $client = Client::factory()->for($user)->create([
+    $contratante = Contratante::factory()->for($user)->create([
         'name' => 'Pedro',
         'email' => 'pedro@email.com',
         'cpf' => '555.666.777-88',
@@ -91,13 +91,13 @@ it('detects unresolved variables', function () {
         'birth_date' => null,
     ]);
 
-    $body = 'Nome: $cliente.nome, RG: $cliente.rg, Nascimento: $cliente.nascimento';
+    $body = 'Nome: $contratante.nome, RG: $contratante.rg, Nascimento: $contratante.nascimento';
 
     $resolver = app(ContractVariableResolver::class);
-    $unresolved = $resolver->unresolvedVariables($body, $client);
+    $unresolved = $resolver->unresolvedVariables($body, $contratante);
 
     expect($unresolved)
-        ->toContain('$cliente.rg')
-        ->toContain('$cliente.nascimento')
-        ->not->toContain('$cliente.nome');
+        ->toContain('$contratante.rg')
+        ->toContain('$contratante.nascimento')
+        ->not->toContain('$contratante.nome');
 });

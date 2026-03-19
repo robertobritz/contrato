@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Client;
+use App\Models\Contratante;
 
 class ContractVariableResolver
 {
-    public function resolve(string $body, Client $client): string
+    public function resolve(string $body, Contratante $contratante): string
     {
-        $map = $this->sortedMap($client);
+        $map = $this->sortedMap($contratante);
 
         foreach ($map as $variable => $value) {
             if ($value !== '') {
@@ -24,9 +24,9 @@ class ContractVariableResolver
     /**
      * @return array<int, string>
      */
-    public function unresolvedVariables(string $body, Client $client): array
+    public function unresolvedVariables(string $body, Contratante $contratante): array
     {
-        $map = $this->sortedMap($client);
+        $map = $this->sortedMap($contratante);
         $unresolved = [];
 
         foreach ($map as $variable => $value) {
@@ -41,10 +41,10 @@ class ContractVariableResolver
     /**
      * @return array<string, string>
      */
-    private function sortedMap(Client $client): array
+    private function sortedMap(Contratante $contratante): array
     {
-        $map = $client->variableMap();
-        uksort($map, fn (string $a, string $b): int => strlen($b) <=> strlen($a));
+        $map = $contratante->variableMap();
+        uksort($map, fn(string $a, string $b): int => strlen($b) <=> strlen($a));
 
         return $map;
     }

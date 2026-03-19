@@ -8,8 +8,8 @@ Route::get('/', function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/contracts/{clientContract}/export/pdf', [ContractExportController::class, 'pdf'])
+    Route::get('/contracts/{contratanteContract}/export/pdf', [ContractExportController::class, 'pdf'])
         ->name('contracts.export.pdf');
-    Route::get('/contracts/{clientContract}/export/docx', [ContractExportController::class, 'docx'])
+    Route::get('/contracts/{contratanteContract}/export/docx', [ContractExportController::class, 'docx'])
         ->name('contracts.export.docx');
 });

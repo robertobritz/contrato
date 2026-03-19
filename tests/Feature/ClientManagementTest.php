@@ -2,77 +2,78 @@
 
 declare(strict_types=1);
 
-use App\Filament\Resources\Clients\Pages\CreateClient;
-use App\Filament\Resources\Clients\Pages\EditClient;
-use App\Filament\Resources\Clients\Pages\ListClients;
-use App\Models\Client;
+use App\Filament\Resources\Contratantes\Pages\CreateContratante;
+use App\Filament\Resources\Contratantes\Pages\EditContratante;
+use App\Filament\Resources\Contratantes\Pages\ListContratantes;
+use App\Models\Contratante;
 use App\Models\User;
 use Livewire\Livewire;
+use Tests\TestCase;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 
 beforeEach(function () {
-    /** @var \Tests\TestCase&object{user: \App\Models\User} $this */
+    /** @var TestCase&object{user: User} $this */
     $this->user = User::factory()->create();
     actingAs($this->user);
 });
 
-it('can list clients', function () {
-    $clients = Client::factory()
+it('can list contratantes', function () {
+    $contratantes = Contratante::factory()
         ->count(3)
         ->for($this->user)
         ->create();
 
-    Livewire::test(ListClients::class)
+    Livewire::test(ListContratantes::class)
         ->assertOk()
-        ->assertCanSeeTableRecords($clients);
+        ->assertCanSeeTableRecords($contratantes);
 });
 
-it('cannot see other users clients', function () {
+it('cannot see other users contratantes', function () {
     $otherUser = User::factory()->create();
-    $otherClient = Client::factory()->for($otherUser)->create();
+    $otherContratante = Contratante::factory()->for($otherUser)->create();
 
-    Livewire::test(ListClients::class)
-        ->assertCanNotSeeTableRecords([$otherClient]);
+    Livewire::test(ListContratantes::class)
+        ->assertCanNotSeeTableRecords([$otherContratante]);
 });
 
-it('can create a client', function () {
-    $newClient = Client::factory()->make();
+it('can create a contratante', function () {
+    $newContratante = Contratante::factory()->make();
 
-    Livewire::test(CreateClient::class)
+    Livewire::test(CreateContratante::class)
         ->fillForm([
-            'name' => $newClient->name,
-            'email' => $newClient->email,
-            'cpf' => $newClient->cpf,
-            'phone' => $newClient->phone,
+            'name' => $newContratante->name,
+            'email' => $newContratante->email,
+            'cpf' => $newContratante->cpf,
+            'phone' => $newContratante->phone,
         ])
         ->call('create')
         ->assertNotified()
         ->assertRedirect();
 
-    assertDatabaseHas(Client::class, [
-        'name' => $newClient->name,
-        'email' => $newClient->email,
+    assertDatabaseHas(Contratante::class, [
+        'name' => $newContratante->name,
+        'email' => $newContratante->email,
         'user_id' => $this->user->id,
     ]);
 });
 
-it('can edit a client', function () {
-    $client = Client::factory()->for($this->user)->create();
+it('can edit a contratante', function () {
+    $contratante = Contratante::factory()->for($this->user)->create();
 
-    Livewire::test(EditClient::class, ['record' => $client->getRouteKey()])
+    Livewire::test(EditContratante::class, ['record' => $contratante->getRouteKey()])
         ->fillForm([
             'name' => 'Nome Atualizado',
         ])
         ->call('save')
         ->assertNotified();
 
-    expect($client->refresh()->name)->toBe('Nome Atualizado');
+    expect($contratante->refresh()->name)->toBe('Nome Atualizado');
 });
 
 it('validates required fields on create', function () {
-    Livewire::test(CreateClient::class)
+    Livewire::test(CreateContratante::class)
         ->fillForm([
             'name' => null,
             'email' => null,
@@ -82,9 +83,9 @@ it('validates required fields on create', function () {
         ->assertHasFormErrors(['name', 'email', 'cpf']);
 });
 
-it('prevents unauthenticated users from accessing clients', function () {
+it('prevents unauthenticated users from accessing contratantes', function () {
     auth()->logout();
 
-    $this->get(route('filament.admin.resources.clients.index'))
+    $this->get(route('filament.admin.resources.contratantes.index'))
         ->assertRedirect();
 });

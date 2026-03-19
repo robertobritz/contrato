@@ -28,9 +28,14 @@ class User extends Authenticatable
         ];
     }
 
-    public function clients(): HasMany
+    public function contratantes(): HasMany
     {
-        return $this->hasMany(Client::class);
+        return $this->hasMany(Contratante::class);
+    }
+
+    public function contratados(): HasMany
+    {
+        return $this->hasMany(Contratado::class);
     }
 
     public function contracts(): HasMany

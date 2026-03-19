@@ -32,8 +32,8 @@ class Contract extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function clientContracts(): HasMany
+    public function contratanteContracts(): HasMany
     {
-        return $this->hasMany(ClientContract::class);
+        return $this->hasMany(ContratanteContract::class);
     }
 }

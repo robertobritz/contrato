@@ -8,7 +8,7 @@
 ## 1. Visão Geral
 
 **ContractFlow** é um sistema web de gestão e edição de contratos jurídicos no navegador.  
-O usuário carrega um contrato-base com variáveis dinâmicas (`$cliente.nome`, `$cliente.cpf`, etc.) e o sistema gera versões personalizadas para cada cliente cadastrado, mantendo o original intacto para reedição.
+O usuário carrega um contrato-base com variáveis dinâmicas (`$contratante.nome`, `$contratante.cpf`, etc.) e o sistema gera versões personalizadas para cada contratante cadastrado, mantendo o original intacto para reedição.
 
 ---
 
@@ -72,32 +72,43 @@ takeout enable mysql
 
 Gerenciado pelo Laravel/Filament. Campos padrão + `is_admin` (boolean).
 
-### 5.2 `clients`
+### 5.2 `contratantes`
 
-Atributos utilizados em contratos:
+Partes contratantes. Atributos utilizados em contratos:
 
-| Coluna               | Tipo       | Variável no contrato            |
-| -------------------- | ---------- | ------------------------------- |
-| `id`                 | UUID       | —                               |
-| `user_id`            | FK → users | —                               |
-| `name`               | string     | `$cliente.nome`                 |
-| `email`              | string     | `$cliente.email`                |
-| `phone`              | string     | `$cliente.telefone`             |
-| `cpf`                | string     | `$cliente.cpf`                  |
-| `rg`                 | string     | `$cliente.rg`                   |
-| `birth_date`         | date       | `$cliente.nascimento`           |
-| `nationality`        | string     | `$cliente.nacionalidade`        |
-| `marital_status`     | enum       | `$cliente.estado_civil`         |
-| `profession`         | string     | `$cliente.profissao`            |
-| `address`            | string     | `$cliente.endereco`             |
-| `address_number`     | string     | `$cliente.endereco_numero`      |
-| `address_complement` | string     | `$cliente.endereco_complemento` |
-| `neighborhood`       | string     | `$cliente.bairro`               |
-| `city`               | string     | `$cliente.cidade`               |
-| `state`              | string     | `$cliente.estado`               |
-| `zip_code`           | string     | `$cliente.cep`                  |
-| `created_at`         | timestamp  | —                               |
-| `updated_at`         | timestamp  | —                               |
+| Coluna               | Tipo       | Variável no contrato                |
+| -------------------- | ---------- | ----------------------------------- |
+| `id`                 | UUID       | —                                   |
+| `user_id`            | FK → users | —                                   |
+| `name`               | string     | `$contratante.nome`                 |
+| `email`              | string     | `$contratante.email`                |
+| `phone`              | string     | `$contratante.telefone`             |
+| `cpf`                | string     | `$contratante.cpf`                  |
+| `rg`                 | string     | `$contratante.rg`                   |
+| `birth_date`         | date       | `$contratante.nascimento`           |
+| `nationality`        | string     | `$contratante.nacionalidade`        |
+| `marital_status`     | enum       | `$contratante.estado_civil`         |
+| `profession`         | string     | `$contratante.profissao`            |
+| `address`            | string     | `$contratante.endereco`             |
+| `address_number`     | string     | `$contratante.endereco_numero`      |
+| `address_complement` | string     | `$contratante.endereco_complemento` |
+| `neighborhood`       | string     | `$contratante.bairro`               |
+| `city`               | string     | `$contratante.cidade`               |
+| `state`              | string     | `$contratante.estado`               |
+| `zip_code`           | string     | `$contratante.cep`                  |
+| `created_at`         | timestamp  | —                                   |
+| `updated_at`         | timestamp  | —                                   |
+
+### 5.2b `contratados`
+
+Partes contratadas. Mesma estrutura de campos que `contratantes`, com variáveis prefixadas por `$contratado.*`:
+
+| Variável                         | Campo   |
+| -------------------------------- | ------- |
+| `$contratado.nome`               | `name`  |
+| `$contratado.cpf`                | `cpf`   |
+| `$contratado.email`              | `email` |
+| … (mesmos campos de contratante) |         |
 
 ### 5.3 `contracts` (Contratos-base)
 
@@ -106,30 +117,41 @@ Atributos utilizados em contratos:
 | `id`                 | UUID                     | —                                                                              |
 | `user_id`            | FK → users               | Dono do contrato                                                               |
 | `title`              | string                   | Nome descritivo                                                                |
-| `body`               | longText                 | Conteúdo HTML com variáveis `$cliente.*`                                       |
+| `body`               | longText                 | Conteúdo HTML com variáveis `$contratante.*`                                   |
 | `source_type`        | enum(`upload`, `manual`) | Forma de criação do contrato                                                   |
 | `original_file_path` | string nullable          | Caminho do arquivo `.doc`/`.docx` carregado (só quando `source_type = upload`) |
 | `created_at`         | timestamp                | —                                                                              |
 | `updated_at`         | timestamp                | —                                                                              |
 
-### 5.4 `client_contracts` (Contratos por cliente)
+### 5.4 `contratante_contracts` (Contratos por contratante)
 
 | Coluna               | Tipo               | Descrição                                         |
 | -------------------- | ------------------ | ------------------------------------------------- |
 | `id`                 | UUID               | —                                                 |
 | `contract_id`        | FK → contracts     | Contrato-base                                     |
-| `client_id`          | FK → clients       | Cliente vinculado                                 |
+| `contratante_id`     | FK → contratantes  | Contratante vinculado                             |
 | `body`               | longText           | Cópia do body com variáveis substituídas          |
 | `is_manually_edited` | boolean            | True se o usuário editou manualmente após geração |
 | `generated_at`       | timestamp nullable | Data da última geração automática                 |
 | `created_at`         | timestamp          | —                                                 |
 | `updated_at`         | timestamp          | —                                                 |
 
+### 5.5 `objeto_contratos` (Objetos de Contrato)
+
+| Coluna           | Tipo                      | Descrição             |
+| ---------------- | ------------------------- | --------------------- |
+| `id`             | UUID                      | —                     |
+| `contratante_id` | FK → contratantes         | Contratante vinculado |
+| `contratado_id`  | FK → contratados          | Contratado vinculado  |
+| `tipo`           | enum(`servico`,`produto`) | Tipo do objeto        |
+| `descricao`      | text                      | Descrição do objeto   |
+| `quantidade`     | decimal                   | Quantidade            |
+| `unidade`        | string nullable           | Unidade de medida     |
+| `valor`          | decimal                   | Valor unitário        |
+| `created_at`     | timestamp                 | —                     |
+| `updated_at`     | timestamp                 | —                     |
+
 ---
-
-## 6. Funcionalidades Detalhadas
-
-### F1 — Criação de Contrato-base
 
 - O usuário autenticado acessa **Contratos > Novo**.
 - O formulário apresenta uma **seleção exclusiva de modo de criação** (Radio / Toggle):
@@ -156,83 +178,91 @@ Atributos utilizados em contratos:
 - No modo upload, apenas `.doc` e `.docx` são aceitos (validação MIME real).
 - Tamanho máximo do arquivo: 5 MB.
 - O "Corpo do Contrato" (editor WYSIWYG) é sempre o único campo de edição de conteúdo, independentemente do modo escolhido.
-- O upload não cria `client_contracts` — só o contrato-base.
+- O upload não cria `contratante_contracts` — só o contrato-base.
 
 ### F2 — Visualização e Edição do Contrato-base
 
 - O painel exibe o `body` em um editor WYSIWYG (TipTap via Filament) sob o rótulo **"Corpo do Contrato"**.
 - Se o contrato foi criado via upload, o conteúdo inicial do editor é o texto extraído do arquivo Word.
 - Se foi criado manualmente, o editor inicia com o conteúdo salvo anteriormente.
-- O usuário edita livremente, incluindo escrevendo variáveis `$cliente.*`.
-- Um **botão flutuante "Variáveis"** (fixo no canto inferior direito, segue a rolagem da tela) exibe a lista de variáveis de cliente disponíveis. O painel mostra apenas o rótulo de cada variável; ao clicar no ícone de copiar, a variável é copiada para a área de transferência e o painel é fechado automaticamente para facilitar a inserção no editor. Um **contador numérico** exibido ao lado de cada variável indica quantas vezes ela já foi utilizada no contrato (atualizado em tempo real a cada segundo). O botão flutuante está disponível tanto na **criação** quanto na **edição** de contratos.
+- O usuário edita livremente, incluindo escrevendo variáveis `$contratante.*` e `$contratado.*`.
+- Um **botão flutuante "Variáveis"** (fixo no canto inferior direito, segue a rolagem da tela) exibe a lista de variáveis de contratante disponíveis. O painel mostra apenas o rótulo de cada variável; ao clicar no ícone de copiar, a variável é copiada para a área de transferência e o painel é fechado automaticamente para facilitar a inserção no editor. Um **contador numérico** exibido ao lado de cada variável indica quantas vezes ela já foi utilizada no contrato (atualizado em tempo real a cada segundo). O botão flutuante está disponível tanto na **criação** quanto na **edição** de contratos.
 - Ao salvar, apenas `contracts.body` é atualizado.
-- Os `client_contracts` **não** são recalculados automaticamente — o usuário escolhe quando regenerar.
+- Os `contratante_contracts` **não** são recalculados automaticamente — o usuário escolhe quando regenerar.
 
-### F3 — Cadastro de Clientes
+### F3 — Cadastro de Contratantes e Contratados
 
-- Resource **Clientes** no Filament com todos os campos da tabela `clients`.
+- Resource **Contratantes** no Filament com todos os campos da tabela `contratantes`.
+- Resource **Contratados** no Filament com todos os campos da tabela `contratados`.
 - Listagem com busca por nome, CPF e e-mail.
 - Validações: CPF único por usuário, e-mail único, campos obrigatórios sinalizados.
 
-### F4 — Vinculação de Cliente ao Contrato
+### F3b — Objeto do Contrato
 
-- Na tela do contrato-base, uma seção **"Clientes vinculados"** lista os `client_contracts`.
-- Botão **"Vincular cliente"** abre um modal de seleção (Select do Filament com busca).
-- Ao vincular, o sistema cria o `client_contract` e executa a substituição de variáveis imediatamente (geração inicial).
+- Resource **Objetos de Contrato** no Filament com os campos: contratante, contratado, tipo, descrição, quantidade, unidade e valor.
+- Na criação, são listados os contratantes e contratados cadastrados pelo usuário.
+
+### F4 — Vinculação de Contratante ao Contrato
+
+- Na tela do contrato-base, uma seção **"Contratantes vinculados"** lista os `contratante_contracts`.
+- Botão **"Vincular contratante"** abre um modal de seleção (Select do Filament com busca).
+- Ao vincular, o sistema cria o `contratante_contract` e executa a substituição de variáveis imediatamente (geração inicial).
 
 ### F5 — Sistema de Variáveis
 
-**Mapeamento completo** (`$cliente.{chave}` → `clients.{coluna}`):
+**Mapeamento completo** (`$contratante.{chave}` → `contratantes.{coluna}`):
 
 ```
-$cliente.nome              → name
-$cliente.email             → email
-$cliente.telefone          → phone
-$cliente.cpf               → cpf
-$cliente.rg                → rg
-$cliente.nascimento        → birth_date (formatado: d/m/Y)
-$cliente.nacionalidade     → nationality
-$cliente.estado_civil      → marital_status
-$cliente.profissao         → profession
-$cliente.endereco          → address
-$cliente.endereco_numero   → address_number
-$cliente.endereco_complemento → address_complement
-$cliente.bairro            → neighborhood
-$cliente.cidade            → city
-$cliente.estado            → state
-$cliente.cep               → zip_code
+$contratante.nome              → name
+$contratante.email             → email
+$contratante.telefone          → phone
+$contratante.cpf               → cpf
+$contratante.rg                → rg
+$contratante.nascimento        → birth_date (formatado: d/m/Y)
+$contratante.nacionalidade     → nationality
+$contratante.estado_civil      → marital_status
+$contratante.profissao         → profession
+$contratante.endereco          → address
+$contratante.endereco_numero   → address_number
+$contratante.endereco_complemento → address_complement
+$contratante.bairro            → neighborhood
+$contratante.cidade            → city
+$contratante.estado            → state
+$contratante.cep               → zip_code
 ```
+
+Idem para contratado com prefixo `$contratado.*`.
 
 **Implementação via Service:**
 
 ```php
 // App\Services\ContractVariableResolver
 
-public function resolve(string $body, Client $client): string
+public function resolve(string $body, Contratante $contratante): string
 {
-    $map = $client->variableMap(); // retorna array ['$cliente.nome' => 'João', ...]
+    $map = $contratante->variableMap(); // retorna array ['$contratante.nome' => 'João', ...]
     return str_replace(array_keys($map), array_values($map), $body);
 }
 ```
 
-- Variáveis sem correspondência (campo vazio no cliente) são **mantidas** no texto (não apagadas), permitindo revisão.
+- Variáveis sem correspondência (campo vazio no contratante) são **mantidas** no texto (não apagadas), permitindo revisão.
 - Um helper opcional pode listar as variáveis detectadas no `body` que ainda não foram resolvidas.
 
-### F6 — Contratos por Cliente (Edição Individual)
+### F6 — Contratos por Contratante (Edição Individual)
 
-- Cada `client_contract` pode ser aberto e editado separadamente no editor WYSIWYG.
+- Cada `contratante_contract` pode ser aberto e editado separadamente no editor WYSIWYG.
 - Ao editar manualmente, o campo `is_manually_edited` passa a `true`.
 - Um aviso visual indica se o contrato-base foi alterado após a última geração.
-- O usuário pode **"Regenerar"** o contrato do cliente (sobrescreve o `body` do `client_contract` com a substituição atual), perdendo edições manuais (confirmação necessária).
+- O usuário pode **"Regenerar"** o contrato do contratante (sobrescreve o `body` do `contratante_contract` com a substituição atual), perdendo edições manuais (confirmação necessária).
 
-### F7 — Contratos Originais vs. Contratos de Cliente
+### F7 — Contratos Originais vs. Contratos de Contratante
 
-|                      | Contrato-base (`contracts`)                                 | Contrato do cliente (`client_contracts`) |
-| -------------------- | ----------------------------------------------------------- | ---------------------------------------- |
-| Editável?            | Sim, sempre                                                 | Sim, independentemente                   |
-| Contém variáveis?    | Sim                                                         | Não (substituídas)                       |
-| Pode ser regenerado? | N/A                                                         | Sim (a partir do contrato-base)          |
-| Exclusão             | Remove também os client_contracts (soft delete recomendado) | Independente                             |
+|                      | Contrato-base (`contracts`)                                      | Contrato do contratante (`contratante_contracts`) |
+| -------------------- | ---------------------------------------------------------------- | ------------------------------------------------- |
+| Editável?            | Sim, sempre                                                      | Sim, independentemente                            |
+| Contém variáveis?    | Sim                                                              | Não (substituídas)                                |
+| Pode ser regenerado? | N/A                                                              | Sim (a partir do contrato-base)                   |
+| Exclusão             | Remove também os contratante_contracts (soft delete recomendado) | Independente                                      |
 
 ---
 
@@ -246,16 +276,18 @@ app/
 │       ├── ContractResource.php
 │       └── ClientContractResource.php
 ├── Models/
-│   ├── Client.php
+│   ├── Contratante.php
+│   ├── Contratado.php
 │   ├── Contract.php
-│   └── ClientContract.php
+│   ├── ObjetoContrato.php
+│   └── ContratanteContract.php
 ├── Services/
 │   ├── ContractVariableResolver.php
 │   ├── ContractImportService.php   # extrai texto de .txt/.docx/.html
 │   └── ClientContractGenerator.php
 ├── Policies/
 │   ├── ContractPolicy.php
-│   └── ClientPolicy.php
+│   └── ContratantePolicy.php
 └── Http/
     └── Requests/
         ├── StoreClientRequest.php
@@ -265,8 +297,8 @@ tests/
 ├── Feature/
 │   ├── ContractUploadTest.php
 │   ├── ContractEditorTest.php
-│   ├── ClientManagementTest.php
-│   ├── ClientContractBindingTest.php
+│   ├── ContratanteManagementTest.php
+│   ├── ContratanteContractBindingTest.php
 │   └── VariableResolutionTest.php
 └── Unit/
     ├── ContractVariableResolverTest.php
@@ -277,7 +309,7 @@ tests/
 
 ## 8. Segurança e Autorização
 
-- **Policies** para `Contract` e `Client`: usuário só acessa seus próprios registros (`user_id`).
+- **Policies** para `Contract` e `Contratante`: usuário só acessa seus próprios registros (`user_id`).
 - Filament Shield (ou Gate manual) para controle de permissões por papel.
 - Autenticação obrigatória em todas as rotas do painel.
 - Upload com validação de MIME real (não só extensão): usar `mimetypes` no FormRequest.

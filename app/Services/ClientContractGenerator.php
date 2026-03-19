@@ -4,49 +4,49 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\Client;
-use App\Models\ClientContract;
 use App\Models\Contract;
+use App\Models\Contratante;
+use App\Models\ContratanteContract;
 
 class ClientContractGenerator
 {
     public function __construct(private ContractVariableResolver $resolver) {}
 
-    public function generate(Contract $contract, Client $client): ClientContract
+    public function generate(Contract $contract, Contratante $contratante): ContratanteContract
     {
-        $existing = ClientContract::query()
+        $existing = ContratanteContract::query()
             ->where('contract_id', $contract->id)
-            ->where('client_id', $client->id)
+            ->where('contratante_id', $contratante->id)
             ->first();
 
         if ($existing) {
             return $existing;
         }
 
-        $resolvedBody = $this->resolver->resolve($contract->body, $client);
+        $resolvedBody = $this->resolver->resolve($contract->body, $contratante);
 
-        return ClientContract::query()->create([
+        return ContratanteContract::query()->create([
             'contract_id' => $contract->id,
-            'client_id' => $client->id,
+            'contratante_id' => $contratante->id,
             'body' => $resolvedBody,
             'is_manually_edited' => false,
             'generated_at' => now(),
         ]);
     }
 
-    public function regenerate(ClientContract $clientContract): ClientContract
+    public function regenerate(ContratanteContract $contratanteContract): ContratanteContract
     {
-        $contract = $clientContract->contract;
-        $client = $clientContract->client;
+        $contract = $contratanteContract->contract;
+        $contratante = $contratanteContract->contratante;
 
-        $resolvedBody = $this->resolver->resolve($contract->body, $client);
+        $resolvedBody = $this->resolver->resolve($contract->body, $contratante);
 
-        $clientContract->update([
+        $contratanteContract->update([
             'body' => $resolvedBody,
             'is_manually_edited' => false,
             'generated_at' => now(),
         ]);
 
-        return $clientContract->refresh();
+        return $contratanteContract->refresh();
     }
 }

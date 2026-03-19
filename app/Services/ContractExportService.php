@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Models\ClientContract;
+use App\Models\ContratanteContract;
 use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
@@ -12,7 +12,7 @@ use PhpOffice\PhpWord\Shared\Html;
 
 class ContractExportService
 {
-    public function toPdfContent(ClientContract $contract): string
+    public function toPdfContent(ContratanteContract $contract): string
     {
         $html = $this->buildHtml($contract);
         $pdf = Pdf::loadHTML($html)->setPaper('a4');
@@ -20,7 +20,7 @@ class ContractExportService
         return $pdf->output();
     }
 
-    public function toDocxContent(ClientContract $contract): string
+    public function toDocxContent(ContratanteContract $contract): string
     {
         $word = new PhpWord;
         $section = $word->addSection();
@@ -37,16 +37,16 @@ class ContractExportService
         return $content;
     }
 
-    public function filename(ClientContract $contract, string $extension): string
+    public function filename(ContratanteContract $contract, string $extension): string
     {
         $title = $contract->contract->title ?? 'contrato';
-        $client = $contract->client->name ?? 'cliente';
-        $slug = str($title . '_' . $client)->slug('_')->lower();
+        $contratante = $contract->contratante->name ?? 'contratante';
+        $slug = str($title . '_' . $contratante)->slug('_')->lower();
 
         return $slug . '.' . $extension;
     }
 
-    private function buildHtml(ClientContract $contract): string
+    private function buildHtml(ContratanteContract $contract): string
     {
         $title = e($contract->contract->title ?? 'Contrato');
         $body = $contract->body;

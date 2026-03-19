@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use App\MaritalStatus;
-use App\Models\Client;
+use App\Models\Contratante;
 use App\Services\ContractVariableResolver;
 
-it('replaces client variables in a contract body', function () {
-    $client = new Client([
+it('replaces contratante variables in a contract body', function () {
+    $contratante = new Contratante([
         'name' => 'João Silva',
         'email' => 'joao@email.com',
         'phone' => '(11) 99999-9999',
@@ -26,14 +26,14 @@ it('replaces client variables in a contract body', function () {
         'zip_code' => '01234-567',
     ]);
 
-    $body = 'Eu, $cliente.nome, CPF $cliente.cpf, RG $cliente.rg, nascido em $cliente.nascimento, '
-        .'$cliente.nacionalidade, $cliente.estado_civil, $cliente.profissao, '
-        .'residente em $cliente.endereco, nº $cliente.endereco_numero, $cliente.endereco_complemento, '
-        .'bairro $cliente.bairro, $cliente.cidade - $cliente.estado, CEP $cliente.cep, '
-        .'e-mail $cliente.email, telefone $cliente.telefone.';
+    $body = 'Eu, $contratante.nome, CPF $contratante.cpf, RG $contratante.rg, nascido em $contratante.nascimento, '
+        . '$contratante.nacionalidade, $contratante.estado_civil, $contratante.profissao, '
+        . 'residente em $contratante.endereco, nº $contratante.endereco_numero, $contratante.endereco_complemento, '
+        . 'bairro $contratante.bairro, $contratante.cidade - $contratante.estado, CEP $contratante.cep, '
+        . 'e-mail $contratante.email, telefone $contratante.telefone.';
 
     $resolver = new ContractVariableResolver;
-    $result = $resolver->resolve($body, $client);
+    $result = $resolver->resolve($body, $contratante);
 
     expect($result)
         ->toContain('João Silva')
@@ -52,41 +52,41 @@ it('replaces client variables in a contract body', function () {
         ->toContain('01234-567')
         ->toContain('joao@email.com')
         ->toContain('(11) 99999-9999')
-        ->not->toContain('$cliente.');
+        ->not->toContain('$contratante.');
 });
 
-it('keeps variables when client field is empty', function () {
-    $client = new Client([
+it('keeps variables when contratante field is empty', function () {
+    $contratante = new Contratante([
         'name' => 'Maria',
         'email' => 'maria@email.com',
         'cpf' => '111.222.333-44',
     ]);
 
-    $body = 'Cliente: $cliente.nome, Profissão: $cliente.profissao, RG: $cliente.rg';
+    $body = 'Contratante: $contratante.nome, Profissão: $contratante.profissao, RG: $contratante.rg';
 
     $resolver = new ContractVariableResolver;
-    $result = $resolver->resolve($body, $client);
+    $result = $resolver->resolve($body, $contratante);
 
     expect($result)
         ->toContain('Maria')
-        ->toContain('$cliente.profissao')
-        ->toContain('$cliente.rg');
+        ->toContain('$contratante.profissao')
+        ->toContain('$contratante.rg');
 });
 
 it('lists unresolved variables in a body', function () {
-    $client = new Client([
+    $contratante = new Contratante([
         'name' => 'João',
         'email' => 'joao@email.com',
         'cpf' => '123.456.789-00',
     ]);
 
-    $body = 'Nome: $cliente.nome, RG: $cliente.rg, Profissão: $cliente.profissao';
+    $body = 'Nome: $contratante.nome, RG: $contratante.rg, Profissão: $contratante.profissao';
 
     $resolver = new ContractVariableResolver;
-    $unresolved = $resolver->unresolvedVariables($body, $client);
+    $unresolved = $resolver->unresolvedVariables($body, $contratante);
 
     expect($unresolved)
-        ->toContain('$cliente.rg')
-        ->toContain('$cliente.profissao')
-        ->not->toContain('$cliente.nome');
+        ->toContain('$contratante.rg')
+        ->toContain('$contratante.profissao')
+        ->not->toContain('$contratante.nome');
 });
