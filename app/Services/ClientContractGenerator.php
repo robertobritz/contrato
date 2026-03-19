@@ -19,6 +19,7 @@ class ClientContractGenerator
         $existing = ContratanteContract::query()
             ->where('contract_id', $contract->id)
             ->where('contratante_id', $contratante->id)
+            ->where('objeto_contrato_id', $objetoContrato?->id)
             ->first();
 
         if ($existing) {

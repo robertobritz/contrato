@@ -73,6 +73,32 @@ it('does not create duplicate contratante contracts for same contract and contra
     expect(ContratanteContract::query()->count())->toBe(1);
 });
 
+it('creates a new contratante contract when objeto contrato is different', function () {
+    $user = User::factory()->create();
+    $contratante = Contratante::factory()->for($user)->create();
+    $contratado = Contratado::factory()->for($user)->create();
+    $objeto1 = ObjetoContrato::factory()->create([
+        'contratante_id' => $contratante->id,
+        'contratado_id' => $contratado->id,
+        'descricao' => 'Serviço A',
+    ]);
+    $objeto2 = ObjetoContrato::factory()->create([
+        'contratante_id' => $contratante->id,
+        'contratado_id' => $contratado->id,
+        'descricao' => 'Serviço B',
+    ]);
+    $contract = Contract::factory()->for($user)->create([
+        'body' => '<p>Objeto: $objeto.descricao.</p>',
+    ]);
+
+    $generator = app(ClientContractGenerator::class);
+    $first = $generator->generate($contract, $contratante, $contratado, $objeto1);
+    $second = $generator->generate($contract, $contratante, $contratado, $objeto2);
+
+    expect($first->id)->not->toBe($second->id);
+    expect(ContratanteContract::query()->count())->toBe(2);
+});
+
 it('resolves contratado variables when generating a contratante contract', function () {
     $user = User::factory()->create();
     $contratante = Contratante::factory()->for($user)->create(['name' => 'João Contratante']);
