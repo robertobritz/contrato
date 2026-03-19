@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Contracts\Schemas;
 
 use App\ContractSourceType;
+use App\Models\Client;
 use App\Services\ContractImportService;
+use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ContractForm
@@ -63,7 +66,7 @@ class ContractForm
                                 $set('body', $importService->extractContent($state));
                             })
                             ->hiddenOn('edit')
-                            ->visible(fn (callable $get): bool => $get('source_type') === ContractSourceType::Upload->value),
+                            ->visible(fn(callable $get): bool => $get('source_type') === ContractSourceType::Upload->value),
                     ]),
 
                 Section::make('Conteúdo')
@@ -72,7 +75,21 @@ class ContractForm
                             ->label('Corpo do Contrato')
                             ->required()
                             ->columnSpanFull()
-                            ->helperText('Use variáveis como $cliente.nome, $cliente.cpf, etc. para dados dinâmicos.'),
+                            ->helperText('Use variáveis como $cliente.nome, $cliente.cpf, etc. para dados dinâmicos.')
+                            ->hintAction(
+                                Action::make('variablesHelper')
+                                    ->label('Variáveis disponíveis')
+                                    ->icon(Heroicon::OutlinedInformationCircle)
+                                    ->modalHeading('Variáveis de Cliente Disponíveis')
+                                    ->modalDescription('Copie e cole qualquer variável abaixo no corpo do contrato para preencher automaticamente com os dados do cliente.')
+                                    ->modalContent(function (): \Illuminate\Contracts\View\View {
+                                        return view('filament.contract-variables-helper', [
+                                            'variables' => Client::availableVariableLabels(),
+                                        ]);
+                                    })
+                                    ->modalSubmitAction(false)
+                                    ->modalCancelActionLabel('Fechar')
+                            ),
                     ]),
             ]);
     }

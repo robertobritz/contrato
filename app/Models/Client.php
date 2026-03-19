@@ -38,6 +38,33 @@ class Client extends Model
     }
 
     /**
+     * Returns all available variable keys mapped to their human-readable labels.
+     *
+     * @return array<string, string>
+     */
+    public static function availableVariableLabels(): array
+    {
+        return [
+            '$cliente.nome' => 'Nome completo',
+            '$cliente.email' => 'E-mail',
+            '$cliente.telefone' => 'Telefone',
+            '$cliente.cpf' => 'CPF',
+            '$cliente.rg' => 'RG',
+            '$cliente.nascimento' => 'Data de nascimento',
+            '$cliente.nacionalidade' => 'Nacionalidade',
+            '$cliente.estado_civil' => 'Estado civil',
+            '$cliente.profissao' => 'Profissão',
+            '$cliente.endereco' => 'Endereço (logradouro)',
+            '$cliente.endereco_numero' => 'Número do endereço',
+            '$cliente.endereco_complemento' => 'Complemento',
+            '$cliente.bairro' => 'Bairro',
+            '$cliente.cidade' => 'Cidade',
+            '$cliente.estado' => 'Estado (UF)',
+            '$cliente.cep' => 'CEP',
+        ];
+    }
+
+    /**
      * @return array<string, string>
      */
     public function variableMap(): array
