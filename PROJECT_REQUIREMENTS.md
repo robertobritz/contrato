@@ -125,16 +125,18 @@ Partes contratadas. Mesma estrutura de campos que `contratantes`, com variáveis
 
 ### 5.4 `contratante_contracts` (Contratos por contratante)
 
-| Coluna               | Tipo               | Descrição                                         |
-| -------------------- | ------------------ | ------------------------------------------------- |
-| `id`                 | UUID               | —                                                 |
-| `contract_id`        | FK → contracts     | Contrato-base                                     |
-| `contratante_id`     | FK → contratantes  | Contratante vinculado                             |
-| `body`               | longText           | Cópia do body com variáveis substituídas          |
-| `is_manually_edited` | boolean            | True se o usuário editou manualmente após geração |
-| `generated_at`       | timestamp nullable | Data da última geração automática                 |
-| `created_at`         | timestamp          | —                                                 |
-| `updated_at`         | timestamp          | —                                                 |
+| Coluna               | Tipo                         | Descrição                                         |
+| -------------------- | ---------------------------- | ------------------------------------------------- |
+| `id`                 | UUID                         | —                                                 |
+| `contract_id`        | FK → contracts               | Contrato-base                                     |
+| `contratante_id`     | FK → contratantes            | Contratante vinculado                             |
+| `contratado_id`      | FK → contratados (null)      | Contratado vinculado                              |
+| `objeto_contrato_id` | FK → objeto_contratos (null) | Objeto de contrato vinculado                      |
+| `body`               | longText                     | Cópia do body com variáveis substituídas          |
+| `is_manually_edited` | boolean                      | True se o usuário editou manualmente após geração |
+| `generated_at`       | timestamp nullable           | Data da última geração automática                 |
+| `created_at`         | timestamp                    | —                                                 |
+| `updated_at`         | timestamp                    | —                                                 |
 
 ### 5.5 `objeto_contratos` (Objetos de Contrato)
 

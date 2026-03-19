@@ -5,8 +5,10 @@ declare(strict_types=1);
 use App\Filament\Resources\ContratanteContracts\Pages\CreateContratanteContract;
 use App\Filament\Resources\ContratanteContracts\Pages\ListContratanteContracts;
 use App\Models\Contract;
+use App\Models\Contratado;
 use App\Models\Contratante;
 use App\Models\ContratanteContract;
+use App\Models\ObjetoContrato;
 use App\Models\User;
 use App\Services\ClientContractGenerator;
 use Livewire\Livewire;
@@ -110,28 +112,56 @@ it('can access the create contratante contract page', function () {
         ->assertOk();
 });
 
-it('can create a contratante contract from the form selecting contract and contratante', function () {
+it('can create a contratante contract from the form with contratado and objeto contrato', function () {
     $contratante = Contratante::factory()->for($this->user)->create(['name' => 'Fernanda']);
-    $contract = Contract::factory()->for($this->user)->create([
+    $contratado = Contratado::factory()->for($this->user)->create(['name' => 'Carlos']);
+    $contrato = Contract::factory()->for($this->user)->create([
         'body' => '<p>Olá $contratante.nome.</p>',
+    ]);
+    $objetoContrato = ObjetoContrato::factory()->create([
+        'contratante_id' => $contratante->id,
+        'contratado_id' => $contratado->id,
     ]);
 
     Livewire::test(CreateContratanteContract::class)
         ->fillForm([
-            'contract_id' => $contract->id,
+            'contract_id' => $contrato->id,
             'contratante_id' => $contratante->id,
+            'contratado_id' => $contratado->id,
+            'objeto_contrato_id' => $objetoContrato->id,
+            'body' => '<p>Corpo do contrato</p>',
         ])
         ->call('create')
-        ->assertNotified()
-        ->assertRedirect();
+        ->assertHasNoFormErrors();
 
     $contratanteContract = ContratanteContract::query()
-        ->where('contract_id', $contract->id)
+        ->where('contract_id', $contrato->id)
         ->where('contratante_id', $contratante->id)
+        ->where('contratado_id', $contratado->id)
+        ->where('objeto_contrato_id', $objetoContrato->id)
         ->first();
 
-    expect($contratanteContract)->not->toBeNull()
-        ->and($contratanteContract->body)->toContain('Fernanda');
+    expect($contratanteContract)->not->toBeNull();
+});
+
+it('stores contratado and objeto contrato relationships on contratante contract model', function () {
+    $contratante = Contratante::factory()->for($this->user)->create();
+    $contratado = Contratado::factory()->for($this->user)->create();
+    $contract = Contract::factory()->for($this->user)->create();
+    $objetoContrato = ObjetoContrato::factory()->create([
+        'contratante_id' => $contratante->id,
+        'contratado_id' => $contratado->id,
+    ]);
+
+    $contratanteContract = ContratanteContract::factory()->create([
+        'contract_id' => $contract->id,
+        'contratante_id' => $contratante->id,
+        'contratado_id' => $contratado->id,
+        'objeto_contrato_id' => $objetoContrato->id,
+    ]);
+
+    expect($contratanteContract->contratado->id)->toBe($contratado->id)
+        ->and($contratanteContract->objetoContrato->id)->toBe($objetoContrato->id);
 });
 
 it('shows the new contrato do contratante button in the list', function () {

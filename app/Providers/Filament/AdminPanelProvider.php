@@ -4,6 +4,8 @@ namespace App\Providers\Filament;
 
 use App\Filament\Resources\Contracts\Pages\CreateContract;
 use App\Filament\Resources\Contracts\Pages\EditContract;
+use App\Filament\Resources\ContratanteContracts\Pages\CreateContratanteContract;
+use App\Filament\Resources\ContratanteContracts\Pages\EditContratanteContract;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -46,8 +48,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook(
                 PanelsRenderHook::PAGE_END,
-                fn () => view('filament.contract-variables-floating'),
-                scopes: [EditContract::class, CreateContract::class],
+                fn() => view('filament.contract-variables-floating'),
+                scopes: [EditContract::class, CreateContract::class, CreateContratanteContract::class, EditContratanteContract::class],
             )
             ->middleware([
                 EncryptCookies::class,

@@ -1,17 +1,16 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
-        Schema::rename('clients', 'contratantes');
+        // No-op: rename was already applied by 2026_03_19_152400_rename_clients_to_contratantes
     }
 
     public function down(): void
     {
-        Schema::rename('contratantes', 'clients');
+        // No-op
     }
 };

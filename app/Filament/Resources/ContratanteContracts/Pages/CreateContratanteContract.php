@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Filament\Resources\ContratanteContracts\Pages;
 
 use App\Filament\Resources\ContratanteContracts\ContratanteContractResource;
-use App\Models\Contratante;
 use App\Models\Contract;
+use App\Models\Contratante;
 use App\Services\ClientContractGenerator;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
@@ -31,6 +31,13 @@ class CreateContratanteContract extends CreateRecord
                 ->send();
         }
 
-        return $contratanteContract;
+        $updateData = [
+            'contratado_id' => $data['contratado_id'] ?? null,
+            'objeto_contrato_id' => $data['objeto_contrato_id'] ?? null,
+        ];
+
+        $contratanteContract->update($updateData);
+
+        return $contratanteContract->refresh();
     }
 }

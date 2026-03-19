@@ -34,4 +34,14 @@ class ContratanteContract extends Model
     {
         return $this->belongsTo(Contratante::class);
     }
+
+    public function contratado(): BelongsTo
+    {
+        return $this->belongsTo(Contratado::class);
+    }
+
+    public function objetoContrato(): BelongsTo
+    {
+        return $this->belongsTo(ObjetoContrato::class);
+    }
 }
