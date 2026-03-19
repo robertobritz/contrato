@@ -50,10 +50,18 @@ it('available variable labels keys match variable map keys', function () {
     expect($helperKeys)->toBe($mapKeys);
 });
 
-it('shows variables helper hint action on edit contract form', function () {
+it('shows contract body editor on edit contract form', function () {
     $contract = Contract::factory()->for($this->user)->create();
 
     Livewire::test(EditContract::class, ['record' => $contract->getRouteKey()])
         ->assertFormFieldExists('body')
         ->assertOk();
+});
+
+it('renders floating variables button on edit contract page', function () {
+    $this->view('filament.contract-variables-floating')
+        ->assertSee('Variáveis de Cliente Disponíveis')
+        ->assertSee('$cliente.nome')
+        ->assertSee('$cliente.cpf')
+        ->assertSee('Copiar variável');
 });

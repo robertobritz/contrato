@@ -164,6 +164,7 @@ Atributos utilizados em contratos:
 - Se o contrato foi criado via upload, o conteúdo inicial do editor é o texto extraído do arquivo Word.
 - Se foi criado manualmente, o editor inicia com o conteúdo salvo anteriormente.
 - O usuário edita livremente, incluindo escrevendo variáveis `$cliente.*`.
+- Um **botão flutuante "Variáveis"** (fixo no canto inferior direito, segue a rolagem da tela) exibe a lista de variáveis de cliente disponíveis. Ao clicar em copiar em qualquer variável, a variável é copiada para a área de transferência e o painel é fechado automaticamente para facilitar a inserção no editor.
 - Ao salvar, apenas `contracts.body` é atualizado.
 - Os `client_contracts` **não** são recalculados automaticamente — o usuário escolhe quando regenerar.
 
