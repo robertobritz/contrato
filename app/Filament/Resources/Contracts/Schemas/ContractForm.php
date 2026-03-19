@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Filament\Resources\Contracts\Schemas;
 
 use App\ContractSourceType;
+use App\ContractType;
 use App\Services\ContractImportService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
@@ -27,6 +28,12 @@ class ContractForm
                             ->label('Título')
                             ->required()
                             ->maxLength(255),
+
+                        ToggleButtons::make('contract_type')
+                            ->label('Tipo de Contrato')
+                            ->options(ContractType::class)
+                            ->inline()
+                            ->required(),
 
                         ToggleButtons::make('source_type')
                             ->label('Modo de criação')
@@ -63,7 +70,7 @@ class ContractForm
                                 $set('body', $importService->extractContent($state));
                             })
                             ->hiddenOn('edit')
-                            ->visible(fn(callable $get): bool => $get('source_type') === ContractSourceType::Upload->value),
+                            ->visible(fn (callable $get): bool => $get('source_type') === ContractSourceType::Upload->value),
                     ]),
 
                 Section::make('Conteúdo')

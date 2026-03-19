@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\ContractSourceType;
+use App\ContractType;
 use Database\Factories\ContractFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -24,6 +25,7 @@ class Contract extends Model
     {
         return [
             'source_type' => ContractSourceType::class,
+            'contract_type' => ContractType::class,
         ];
     }
 

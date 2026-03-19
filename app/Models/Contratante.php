@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\DocumentType;
 use App\MaritalStatus;
 use Database\Factories\ContratanteFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -24,6 +25,7 @@ class Contratante extends Model
         return [
             'birth_date' => 'date',
             'marital_status' => MaritalStatus::class,
+            'document_type' => DocumentType::class,
         ];
     }
 

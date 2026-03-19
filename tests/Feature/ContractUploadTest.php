@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\ContractSourceType;
+use App\ContractType;
 use App\Filament\Resources\Contracts\Pages\CreateContract;
 use App\Filament\Resources\Contracts\Pages\EditContract;
 use App\Filament\Resources\Contracts\Pages\ListContracts;
@@ -44,6 +45,7 @@ it('can create a contract in manual mode', function () {
         ->fillForm([
             'title' => 'Contrato de Locação',
             'source_type' => ContractSourceType::Manual->value,
+            'contract_type' => ContractType::Locacao->value,
             'body' => '<p>Contrato para $cliente.nome</p>',
         ])
         ->call('create')
@@ -63,6 +65,7 @@ it('sets source_type to manual when creating without upload', function () {
         ->fillForm([
             'title' => 'Contrato Manual',
             'source_type' => ContractSourceType::Manual->value,
+            'contract_type' => ContractType::PrestacaoServico->value,
             'body' => '<p>Texto do contrato</p>',
         ])
         ->call('create')
@@ -78,6 +81,7 @@ it('can edit a contract body', function () {
 
     Livewire::test(EditContract::class, ['record' => $contract->getRouteKey()])
         ->fillForm([
+            'contract_type' => ContractType::CompraVenda->value,
             'body' => '<p>Novo conteúdo com $cliente.cpf</p>',
         ])
         ->call('save')

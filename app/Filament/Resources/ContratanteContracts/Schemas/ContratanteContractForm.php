@@ -71,11 +71,19 @@ class ContratanteContractForm
                         Select::make('objeto_contrato_id')
                             ->label('Objeto de Contrato')
                             ->options(
-                                fn (Get $get) => ObjetoContrato::query()
-                                    ->when($get('contratante_id'), fn ($q, $v) => $q->where('contratante_id', $v))
-                                    ->when($get('contratado_id'), fn ($q, $v) => $q->where('contratado_id', $v))
-                                    ->orderBy('descricao')
-                                    ->pluck('descricao', 'id')
+                                fn (Get $get) => ($get('contratante_id') && $get('contratado_id'))
+                                    ? ObjetoContrato::query()
+                                        ->where('contratante_id', $get('contratante_id'))
+                                        ->where('contratado_id', $get('contratado_id'))
+                                        ->orderBy('descricao')
+                                        ->pluck('descricao', 'id')
+                                    : []
+                            )
+                            ->disabled(fn (Get $get) => ! $get('contratante_id') || ! $get('contratado_id'))
+                            ->placeholder(
+                                fn (Get $get) => (! $get('contratante_id') || ! $get('contratado_id'))
+                                    ? 'Selecione primeiro o Contratante e o Contratado'
+                                    : 'Selecione uma opção'
                             )
                             ->searchable()
                             ->required()
