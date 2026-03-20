@@ -14,6 +14,7 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use PhpParser\Node\Stmt\Label;
 
 class ContractForm
 {
@@ -31,7 +32,10 @@ class ContractForm
 
                         ToggleButtons::make('contract_type')
                             ->label('Tipo de Contrato')
-                            ->options(ContractType::class)
+                            ->options(array_combine(
+                                array_map(fn($case) => $case->value, ContractType::cases()),
+                                array_map(fn($case) => $case->label(), ContractType::cases())
+                            ))
                             ->inline()
                             ->required(),
 

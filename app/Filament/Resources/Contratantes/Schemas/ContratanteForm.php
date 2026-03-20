@@ -74,7 +74,10 @@ class ContratanteForm
                             ->maxLength(255),
                         Select::make('marital_status')
                             ->label('Estado Civil')
-                            ->options(MaritalStatus::class),
+                            ->options(array_combine(
+                                array_map(fn($case) => $case->value, MaritalStatus::cases()),
+                                array_map(fn($case) => $case->label(), MaritalStatus::cases())
+                            )),
                         TextInput::make('profession')
                             ->label('Profissão')
                             ->maxLength(255),
